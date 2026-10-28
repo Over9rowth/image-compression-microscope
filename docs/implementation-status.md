@@ -486,3 +486,49 @@ ImageCompressionMicroscope-1.0.0 Setup.exe
 GitHub 的 Release 附件名只接受 ASCII。仓库名、Release 标题、正文都可以随便用中文，**只有附件名不行**。
 
 因此安装包统一改为 `ImageCompressionMicroscope-1.0.0-Setup.exe`，与构建产物同名；README 的安装一节同步。源码 zip 不上传，保留中文名。
+
+## 2026-10-28 修正：exe 版本信息仍写着 GitHub Inc.（v1.0.1）
+
+**问题**：v1.0.0 的 `ImageCompressionMicroscope.exe` 属性里
+`LegalCopyright` 是 `Copyright (C) 2015 GitHub, Inc.`，`CompanyName` 是 `GitHub, Inc.`，
+`FileVersion` 为空。原因是 `packagerConfig` 只给了 `name`/`executableName`/`icon`，
+没有 `appCopyright`、`appVersion`、`win32metadata`——Electron 自带的默认值就留在 exe 里了。
+
+另外两个项目（日光落点预报、反光检查镜）当时已经补齐，所以只有这一个漏了。
+
+**改法**：
+
+```json
+"appCopyright": "Copyright (c) 2026 Over9rowth",
+"appVersion": "1.0.1",
+"win32metadata": {
+  "CompanyName": "Over9rowth",
+  "FileDescription": "图片压缩显微镜",
+  "ProductName": "图片压缩显微镜",
+  "LegalCopyright": "Copyright (c) 2026 Over9rowth",
+  "InternalName": "ImageCompressionMicroscope",
+  "OriginalFilename": "ImageCompressionMicroscope.exe"
+}
+```
+
+**验证**（读安装后 exe 的 `VersionInfo`，不是看文件名）：
+
+```
+CompanyName     : Over9rowth
+FileDescription : 图片压缩显微镜
+ProductName     : 图片压缩显微镜
+LegalCopyright  : Copyright (c) 2026 Over9rowth
+FileVersion     : 1.0.1
+ProductVersion  : 1.0.1
+OriginalFilename: ImageCompressionMicroscope.exe
+```
+
+`npm test` 15/15 通过，`tsc --noEmit` 通过，安装后启动正常（标题「图片压缩显微镜」，
+界面完整渲染，截图 `outputs/ui/launch-1.0.1.png`）。
+
+**本轮只改了 package.json 元数据，没有动任何功能代码。**
+版本号升到 1.0.1，因为 1.0.0 已经发布过——同一个版本号对应两份不同二进制会造成混乱。
+如果 GitHub Release 上挂着 v1.0.0，需要决定是替换资产还是另发 v1.0.1。
+
+交付：`交付物/ImageCompressionMicroscope-1.0.1-Setup.exe`，
+SHA-256 `c428585d6f1f55424729c8ec31d2c2a19c1b102c96ee5264e1c9ae54bd7416be`。
