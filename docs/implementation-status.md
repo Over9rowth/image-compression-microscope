@@ -444,3 +444,37 @@ ImageCompressionMicroscope-1.0.0 Setup.exe
 ```
 
 体积与 0.1.0 完全相同（163,699,200 字节）不是巧合：版本串 `0.1.0` 与 `1.0.0` 等长，Squirrel 的填充式写入后长度不变；但 SHA-256 不同，两者是不同文件。
+
+## 2026-10-28 版权与作者统一为 Over9rowth
+
+`LICENSE` 版权行与 `package.json` 的 `author` 由 `Personal instruments` 改为 `Over9rowth`。
+
+### 为什么改这两处就必须重新打包
+
+`author` 不只是仓库里的一行文字，它往下游渗透到三个用户可见的位置：
+
+| 落点 | 取值链 |
+|---|---|
+| nuspec `<authors>` → 注册表 `Publisher` | `electron-winstaller` 里 `metadata.authors = metadata.author` |
+| nuspec `<copyright>` | `"Copyright © " + 年份 + " " + metadata.authors` |
+| exe 的 `CompanyName` | `electron-packager` 取 `package.json` 的 `author` |
+
+所以只改仓库文本、不重打包，装出来的程序在「控制面板 → 应用」里仍然写着旧名字，属于改了半截。
+
+### 实测
+
+| 项 | 结果 |
+|---|---|
+| exe `CompanyName` | `Over9rowth` |
+| exe `LegalCopyright` | `Copyright © 2026 Over9rowth` |
+| 注册表 `Publisher` | `Over9rowth` |
+| 注册表 `DisplayName` / `DisplayVersion` | `图片压缩显微镜` / `1.0.0` |
+| 安装 / 启动 | 退出码 0，两个快捷方式生成，窗口标题码位一致 |
+
+新安装包 163,699,712 字节（比上一版多 12 字节，作者串变短导致压缩后长度略变），SHA-256 `cdc0a16191b9feaf335f452f06ab0cba38e581b8736ef97f247ec834add15c09`。
+
+### 故意没改的
+
+`packagerConfig.appBundleId` 仍是 `local.instruments.compression`。它是应用标识而不是署名，改了会让 Electron 的 `userData` 目录跟着变，已有会话与设置会「消失」。要改就单独做一次迁移。
+
+`src/main/index.ts` 里清理旧快捷方式时用的 `'Personal instruments'` 字符串也保留——那是历史遗留目录名，不是署名。
