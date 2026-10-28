@@ -532,3 +532,59 @@ OriginalFilename: ImageCompressionMicroscope.exe
 
 交付：`交付物/ImageCompressionMicroscope-1.0.1-Setup.exe`，
 SHA-256 `c428585d6f1f55424729c8ec31d2c2a19c1b102c96ee5264e1c9ae54bd7416be`。
+
+## 2026-10-28 发布：撤下 v1.0.0，改发 v1.0.1
+
+**决定**：不是替换 v1.0.0 的附件，而是撤掉整个 v1.0.0（release + tag），另发 v1.0.1。
+
+理由：v1.0.0 那个包里 exe 的属性页写着 `GitHub, Inc.`，是个有瑕疵的二进制；
+若把新包挂在 v1.0.0 名下，同一个版本号会对应两份不同文件，比撤下更糟。
+撤下的成本为零——`v1.0.0` 附件的 `download_count` 是 **0**，没有人的校验记录会因此失效。
+提交历史里 `c2a92d9`（1.0.0 的打包提交）仍在，需要时可以从那个 commit 重新构建。
+
+**过程里的一个坑：本机连不上 `github.com`。**
+
+```text
+$ git push origin HEAD:main
+fatal: unable to access 'https://github.com/Over9rowth/image-compression-microscope.git/':
+       CONNECT tunnel failed, response 502
+```
+
+本地代理对 `github.com:443` 一律返回 502，直连也不通；但 `api.github.com` 与
+`uploads.github.com` 都正常。所以 git 传输层走不了，改用 REST 的 Git Data API：
+
+1. `POST /git/blobs` 建两个 blob —— 注意**必须从 `git cat-file blob HEAD:<path>` 取字节**，
+   不能读工作区文件：工作区 `package.json` 是 CRLF（2605 字节），仓库里存的是 LF（2524 字节），
+   读错源会让 tree 哈希对不上。
+2. `POST /git/trees`（带 `base_tree`）→ `POST /git/commits` → `PATCH /git/refs/heads/main`。
+
+author / committer / 时间戳都按本地提交原样填（`date` 要用 ISO 8601，直接写
+`1793190775 +0800` 会被 422 拒掉）。这样建出来的提交 SHA 与本地 `1c19ccd` **逐位相同**，
+本地与远端没有产生分叉，下次网络正常时 `git push` 是空操作。
+
+**发布结果**（以下均为 API 返回，不是本地推算）：
+
+| 项 | 值 |
+| --- | --- |
+| tag | `v1.0.1` → 指向本文档所在的那个提交 |
+| release | <https://github.com/Over9rowth/image-compression-microscope/releases/tag/v1.0.1> |
+| 附件 1 | `ImageCompressionMicroscope-1.0.1-Setup.exe`，163,699,712 字节 |
+| 附件 2 | `ImageCompressionMicroscope-1.0.1-Source.zip`，约 160 KB |
+
+两个附件的确切字节数与 SHA-256 写在 Release 正文里，不在这里重复——源码 zip 每跟着
+文档改一次内容，字节数就会变，写死在文档里必然对不上。
+
+源码 zip 这次一并上传了（v1.0.0 当时只传了 exe）。文件名用 ASCII，理由同上次：
+GitHub 会剥掉附件名里的非 ASCII 字符。zip 由 `git archive HEAD` 生成，
+只含 48 个受版本控制的文件，不含 `node_modules`、`out`、`outputs` 与本机日志。
+
+**回读校验**（不是只信上传返回）：
+
+- 源码 zip 全量下载回来，SHA-256 与本地文件一致，48 个条目可正常打开。
+- 安装包 163 MB，当前链路下载约 37 KB/s，全量下载不现实，改用 `Range` 抽查：
+  首 1 MiB 与末尾 513 KiB 与本地文件逐字节相同。
+- GitHub 为两个附件算出的 `digest` 字段与本地 `sha256sum` 结果相同。
+
+**未验证**：撤下 v1.0.0 后 `https://github.com/.../releases/tag/v1.0.0` 这个 HTML 页面的
+返回码没有实测——本机到 `github.com` 不通。能确认的是 API 侧
+`/releases/tags/v1.0.0` 与 `/git/ref/tags/v1.0.0` 都已 404。
