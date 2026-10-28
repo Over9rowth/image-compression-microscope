@@ -1,0 +1,9 @@
+# 统一按 LF 存文本，Windows 上检出也不改行尾，避免 diff 里出现整文件变动
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
+*.exe binary
+*.nupkg binary

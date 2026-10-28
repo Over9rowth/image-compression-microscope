@@ -1,0 +1,71 @@
+{
+  "name": "compression-microscope",
+  "productName": "图片压缩显微镜",
+  "version": "0.1.0",
+  "private": true,
+  "description": "本地图片压缩显微镜 · 真实编码损失的可核验观察工具",
+  "author": "Personal instruments",
+  "license": "MIT",
+  "main": "dist/main/index.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && electron .",
+    "test": "node --test tests/*.test.cjs",
+    "smoke": "npm run build && node scripts/smoke.mjs",
+    "check:diff": "npm run build && node scripts/check.mjs diffview",
+    "check:sizecap": "npm run build && node scripts/check.mjs sizecap-ui",
+    "check:zoom": "npm run build && node scripts/check.mjs zoomcursor",
+    "package": "npm run build && electron-forge package",
+    "make": "npm run build && electron-forge make"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "7.10.2",
+    "@electron-forge/maker-squirrel": "7.10.2",
+    "@electron-forge/maker-zip": "7.10.2",
+    "@types/node": "24.10.1",
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.9",
+    "electron": "44.9.3",
+    "esbuild": "0.25.11",
+    "typescript": "5.9.3",
+    "vite": "7.1.12"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "asar": false,
+        "name": "ImageCompressionMicroscope",
+        "executableName": "ImageCompressionMicroscope",
+        "appBundleId": "local.instruments.compression",
+        "icon": "resources/icon.ico",
+        "ignore": [
+          "^/tests",
+          "^/docs",
+          "^/src",
+          "^/scripts"
+        ]
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "win32"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "ImageCompressionMicroscope",
+            "setupIcon": "resources/icon.ico",
+            "title": "图片压缩显微镜"
+          }
+        }
+      ]
+    }
+  }
+}

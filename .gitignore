@@ -1,0 +1,31 @@
+# 依赖与构建产物
+node_modules/
+dist/
+out/
+.vite/
+
+# 测试运行时生成的夹具（pipeline.test.cjs 会写入）
+tests/fixtures/*/
+tests/fixtures/*.png
+tests/fixtures/*.jpg
+
+# 安装包：约 160 MB，超过 GitHub 单文件 100 MB 上限，只作为 Release 附件
+*.exe
+*.nupkg
+RELEASES
+
+# 本地输出
+outputs/
+*.log
+npm-debug.log*
+
+# 本机构建/测试日志：含本机绝对路径，只作本地证据，不进仓库
+docs/make-attempt*.log
+docs/pipeline-test-output.txt
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

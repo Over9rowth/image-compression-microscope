@@ -1,0 +1,4 @@
+import {contextBridge,ipcRenderer,webUtils} from 'electron';
+const api:any={pick:()=>ipcRenderer.invoke('pick'),drop:(file:File)=>ipcRenderer.invoke('drop',webUtils.getPathForFile(file)),process:(p:unknown)=>ipcRenderer.invoke('process',p),observe:(p:unknown)=>ipcRenderer.invoke('observe',p),cancel:()=>ipcRenderer.invoke('cancel'),save:(kind:string,id:string,options:any)=>ipcRenderer.invoke('save',kind,id,options),openSaved:(reveal:boolean)=>ipcRenderer.invoke('openSaved',reveal),sessionSave:(data:unknown)=>ipcRenderer.invoke('sessionSave',data),sessionOpen:()=>ipcRenderer.invoke('sessionOpen'),onJob:(callback:any)=>{const listener=(_:any,m:any)=>callback(m);ipcRenderer.on('job',listener);return()=>ipcRenderer.removeListener('job',listener);}};
+if(process.argv.includes('--microscope-test'))api.testQueue=(data:any)=>ipcRenderer.invoke('test:queue',data);
+contextBridge.exposeInMainWorld('microscope',api);
