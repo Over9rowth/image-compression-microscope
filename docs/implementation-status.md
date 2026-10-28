@@ -478,3 +478,11 @@ ImageCompressionMicroscope-1.0.0 Setup.exe
 `packagerConfig.appBundleId` 仍是 `local.instruments.compression`。它是应用标识而不是署名，改了会让 Electron 的 `userData` 目录跟着变，已有会话与设置会「消失」。要改就单独做一次迁移。
 
 `src/main/index.ts` 里清理旧快捷方式时用的 `'Personal instruments'` 字符串也保留——那是历史遗留目录名，不是署名。
+
+## 2026-10-28 Release 附件名必须用 ASCII
+
+第一次发布 `v1.0.0` 时上传的附件是 `图片压缩显微镜-1.0.0-Setup.exe`，GitHub 把它存成了 **`-1.0.0-Setup.exe`**——附件名里的非 ASCII 字符被整段剥掉，只剩连字符和后面的部分。文件本身没坏，大小 163,699,712 字节与本地完全一致，只是名字残缺，和 README 里写的名字对不上。
+
+GitHub 的 Release 附件名只接受 ASCII。仓库名、Release 标题、正文都可以随便用中文，**只有附件名不行**。
+
+因此安装包统一改为 `ImageCompressionMicroscope-1.0.0-Setup.exe`，与构建产物同名；README 的安装一节同步。源码 zip 不上传，保留中文名。

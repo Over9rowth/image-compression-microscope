@@ -44,7 +44,9 @@
 
 ## 安装
 
-到 [Releases](../../releases) 下载 `图片压缩显微镜-1.0.0-Setup.exe` 双击安装。per-user 安装到 `%LOCALAPPDATA%\ImageCompressionMicroscope`，不需要管理员权限。
+到 [Releases](../../releases) 下载 `ImageCompressionMicroscope-1.0.0-Setup.exe` 双击安装。per-user 安装到 `%LOCALAPPDATA%\ImageCompressionMicroscope`，不需要管理员权限。
+
+> 安装包文件名用 ASCII，因为 GitHub 会把 Release 附件名里的非 ASCII 字符直接剥掉（中文名会变成 `-1.0.0-Setup.exe` 这种残缺样子）。
 
 > 安装包约 160 MB，超过 GitHub 单文件 100 MB 上限，因此**不放在仓库里**，只作为 Release 附件。
 
