@@ -359,7 +359,7 @@ y 方向同理。要点：
 | 快捷方式文件名 | `图片压缩显微镜.lnk` |
 | `packagerConfig.name` / `executableName` | `ImageCompressionMicroscope`（ASCII） |
 | 安装目录 | `%LOCALAPPDATA%\ImageCompressionMicroscope` |
-| 安装包文件名 | `ImageCompressionMicroscope-0.1.0 Setup.exe` |
+| 安装包文件名 | `ImageCompressionMicroscope-<版本> Setup.exe` |
 
 可执行文件保持 ASCII，是为了让 `rcedit`、Squirrel 的 nupkg 命名和命令行调用都不必碰中文路径。
 
@@ -406,3 +406,41 @@ title: appMetadata.productName || appMetadata.name,
 - 不入库：`node_modules/`、`out/`、`dist/`、测试夹具、`*.exe`/`*.nupkg`/`RELEASES`。
 - **也不入库**：`docs/make-attempt*.log`、`docs/pipeline-test-output.txt`。这三份是排障时的原始输出，含本机绝对路径与用户名，对读者没有价值，留在本机即可；文档正文已改为描述结论而非指向文件。
 - 源码包用 `git archive` 导出（不带 `.git`），安装包因 163 MB 超出 GitHub 单文件上限，只能作为 Release 附件。
+
+## 2026-10-28 版本号 0.1.0 → 1.0.0
+
+按使用者要求把版本提升到 `1.0.0`（semver 不接受 `1.0` 两段写法，故补全为 `1.0.0`），并重新打包、重测安装。
+
+改动只有三处，都是版本载体：
+
+| 文件 | 改动 |
+|---|---|
+| `package.json` | `version` → `1.0.0` |
+| `package-lock.json` | 根 `version` 与 `packages[""].version` → `1.0.0`（由 `npm version --no-git-tag-version` 生成，未手改） |
+| `README.md` | 安装一节的文件名 → `图片压缩显微镜-1.0.0-Setup.exe` |
+
+代码零改动。产物名由版本号派生，因此自动变成 `ImageCompressionMicroscope-1.0.0 Setup.exe`、`...-1.0.0-full.nupkg`、`...-win32-x64-1.0.0.zip`。
+
+### 实测
+
+| 项 | 结果 |
+|---|---|
+| 安装包内嵌版本资源 | `FileVersion 1.0.0`、`ProductVersion 1.0.0` |
+| 卸载 0.1.0 | `Update.exe --uninstall` 退出码 0，注册表项清除 |
+| **卸载是否删快捷方式** | ✅ 开始菜单与桌面 `图片压缩显微镜.lnk` **均被删除**，旧 `Personal instruments` 子文件夹也已清掉 |
+| 安装 1.0.0 | `Setup.exe --silent` 退出码 0，目录 `app-1.0.0\` 出现 |
+| 注册表 | `DisplayName 图片压缩显微镜`、`DisplayVersion 1.0.0`、`InstallLocation %LOCALAPPDATA%\ImageCompressionMicroscope` |
+| 从开始菜单快捷方式启动 | 窗口标题「图片压缩显微镜」，码位 `22270,29255,21387,32553,26174,24494,38236`，完全一致；关闭后进程退出 |
+
+**顺带修掉一条历史欠账**：之前一直记为「未验证」的卸载删快捷方式路径，这次实测通过——钩子里的 `unlinkSync` 分支是有效的，不需要再依赖 `Update.exe --removeShortcut`。
+
+卸载残留比早先记录的少一项：现在只剩 `.dead`（空目录）、`Update.exe`、`app-1.0.0\squirrel.exe`，`v8_context_snapshot.bin` 已不在。
+
+### 安装包
+
+```text
+ImageCompressionMicroscope-1.0.0 Setup.exe
+  163,699,200 字节  SHA-256 975c9193e20537ae86850f7a95e1e5f73a4f7d50e17c9e7191e59cb792f9d7ec
+```
+
+体积与 0.1.0 完全相同（163,699,200 字节）不是巧合：版本串 `0.1.0` 与 `1.0.0` 等长，Squirrel 的填充式写入后长度不变；但 SHA-256 不同，两者是不同文件。

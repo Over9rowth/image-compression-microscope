@@ -1,7 +1,7 @@
 {
   "name": "compression-microscope",
   "productName": "图片压缩显微镜",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "本地图片压缩显微镜 · 真实编码损失的可核验观察工具",
   "author": "Personal instruments",
